@@ -1,61 +1,114 @@
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
-import seaborn as sns 
+import seaborn as sns
 from sklearn.datasets import load_wine
 
-sns.set_theme(style = "whitegrid")
-wine = load_wine()
+sns.set_theme(style="ticks")
 
-df = pd.DataFrame(wine.data, columns = wine.feature_names)
-df['target'] = wine.target
+wine_data = load_wine()
 
-df['class_name'] = df['target'].map(lambda x: wine.target_names[x])
+wine_df = pd.DataFrame
+(
+    wine_data.data,
+    columns=wine_data.feature_names
+)
 
-print("=== First Five Records ===")
-print(df.head())
+wine_df.insert(0, "Class", wine_data.target)
 
-print("\n=== Dataset Dimensions ===")
-print(f"Rows: {df.shape[0]}, Columns: {df.shape[1]}")
+wine_df["Wine Type"] = wine_df["Class"].replace
+(
+    dict(enumerate(wine_data.target_names))
+)
 
-print("\n=== Data Types & Non-Null Counts ===")
-print(df.info())
+print("=== Dataset Preview ===")
+print(wine_df.iloc[:5])
 
-print("\n=== Missing Values ===")
-print(df.isnull().sum())
+print("\n=== Dataset Shape ===")
+rows, columns = wine_df.shape
+print("Total Rows:", rows)
+print("Total Columns:", columns)
 
-print("\n=== Summary Statistics (Numerical Features) ===")
-print(df.describe().T[['mean', 'std', 'min', '50%', 'max']])
+print("\n=== Dataset Information ===")
+wine_df.info()
 
-print("\n=== Target Class Distribution ===")
-print(df['class_name'].value_counts())
+print("\n=== Checking Missing Data ===")
+print(wine_df.isna().sum())
 
-plt.figure(figsize = (12, 8))
+print("\n=== Statistical Summary ===")
+stats = wine_df.describe().T
+print(stats.loc[:, ["mean", "std", "min", "50%", "max"]])
 
-numeric_df = df.drop(columns = ['class_name'])
+print("\n=== Wine Type Frequency ===")
+print(wine_df["Wine Type"].value_counts())
 
-sns.heatmap(numeric_df.corr(), annot = True, cmap = "coolwarm", fmt = ".2f", linewidths = 0.5)
+plt.figure(figsize=(11, 7))
 
-plt.title("feature Correlation Matrix")
+numeric_features = wine_df.select_dtypes(
+    include=["int64", "float64"]
+)
+
+sns.heatmap
+(
+    numeric_features.corr(),
+    annot=True,
+    cmap="RdBu_r",
+    center=0,
+    fmt=".2f"
+)
+
+plt.title("Wine Feature Correlation Matrix")
 plt.tight_layout()
 plt.show()
 
-plt.figure(figsize = (6, 4))
-sns.countplot(data = df, x = 'class_name', palette = 'Set2')
+plt.figure(figsize=(7, 5))
 
-plt.title("Wine Class Count Distribution")
+sns.countplot
+(
+    x="Wine Type",
+    data=wine_df,
+    hue="Wine Type",
+    palette="Set3",
+    legend=False
+)
+
+plt.title("Distribution of Wine Classes")
 plt.xlabel("Wine Class")
-
-plt.ylabel("Count")
+plt.ylabel("Number of Samples")
+plt.tight_layout()
 plt.show()
 
-fig, axes = plt.subplots(1, 2, figsize = (14, 5))
+figure, chart = plt.subplots(1, 2, figsize=(14, 5))
 
-sns.boxplot(ax = axes[0], data = df, x = 'class_name', y = 'alcohol', palette = 'Set2')
-axes[0].set_title("Alcohol Level by Wine Class")
+sns.boxplot
+(
+    data=wine_df,
+    x="Wine Type",
+    y="alcohol",
+    hue="Wine Type",
+    palette="Set3",
+    legend=False,
+    ax=chart[0]
+)
 
-sns.boxplot(ax = axes[1], data = df, x = 'class_name', y = 'flavanoids', palette = 'Set2')
-axes[1].set_title("Flavanoid Content by Wine Class")
+chart[0].set_title("Alcohol Content Across Wine Classes")
+chart[0].set_xlabel("Wine Class")
+chart[0].set_ylabel("Alcohol")
+
+sns.boxplot
+(
+    data=wine_df,
+    x="Wine Type",
+    y="flavanoids",
+    hue="Wine Type",
+    palette="Set3",
+    legend=False,
+    ax=chart[1]
+)
+
+chart[1].set_title("Flavanoid Content Across Wine Classes")
+chart[1].set_xlabel("Wine Class")
+chart[1].set_ylabel("Flavanoids")
 
 plt.tight_layout()
 plt.show()
