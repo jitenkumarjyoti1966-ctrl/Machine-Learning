@@ -1,41 +1,62 @@
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
-import seaborn as sns 
+import seaborn as sns
 from sklearn.datasets import load_wine
 
-wine = load_wine()
-df = pd.DataFrame(wine.data, columns = wine.feature_names)
+wine_data = load_wine()
 
-corr_matrix = df.corr()
-
-plt.figure(figsize = (12, 10))
-sns.heatmap(
-    corr_matrix,
-    annot = True,
-    fmt = '.2f',
-    cmap = 'coolwarm',
-    vmin = -1,
-    vmax = 1,
-    linewidth = 0.5
+wine_df = pd.DataFrame
+(
+    wine_data.data,
+    columns=wine_data.feature_names
 )
-plt.title('Correlation Heatmap -Wine Dataset', fontsize = 14, fontweight = 'bold', pad =15)
+
+correlations = wine_df.corr(method="pearson")
+
+fig, ax = plt.subplots(figsize=(12, 10))
+
+sns.heatmap
+(
+    correlations,
+    annot=True,
+    fmt=".2f",
+    cmap="RdYlBu_r",
+    vmin=-1,
+    vmax=1,
+    linewidths=0.5,
+    ax=ax
+)
+
+ax.set_title
+(
+    "Wine Dataset - Feature Correlation",
+    fontsize=14,
+    fontweight="bold",
+    pad=15
+)
+
 plt.tight_layout()
+plt.savefig("wine_features_correlation.png", dpi=300)
+plt.close(fig)
 
-plt.savefig('winr_correlation_heatmap.png', dpi = 300)
-plt.close('all')
+temp_corr = correlations.mask
+(
+    np.eye(correlations.shape[0], dtype=bool)
+)
 
-corr_no_diag = corr_matrix.copy()
-np.fill_diagonal(corr_no_diag.values, np.nan)
+correlation_pairs = (
+    temp_corr.stack()
+    .sort_values(ascending=False)
+)
 
-sorted_corr = corr_no_diag.unstack().dropna().sort_values(ascending = False)
-feat1, feat2 = sorted_corr.index[0]
-corr_val = sorted_corr . iloc[0]
+feature_a, feature_b = correlation_pairs.index[0]
+highest_value = correlation_pairs.iloc[0]
 
-print("=" * 50)
-print("Correlation Analysis Results")
-print("=" * 50)
-print(f"Strongest Positive Correlation: {feat1} <--> {feat2}")
-print(f"Pearson Correlation Coefficient (r): {corr_val:.4f}")
-print("=" * 50)
-print("Saved heatmap image to: wine_correlation_heatmap.png")
+print("-" * 50)
+print("Correlation Analysis")
+print("-" * 50)
+print(f"Highest Positive Correlation: {feature_a} <--> {feature_b}")
+print(f"Pearson Correlation (r): {highest_value:.4f}")
+print("-" * 50)
+print("Heatmap saved as: wine_features_correlation.png")
