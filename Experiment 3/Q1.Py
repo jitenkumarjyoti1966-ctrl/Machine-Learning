@@ -5,62 +5,70 @@ from sklearn.impute import SimpleImputer
 from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import OneHotEncoder, StandardScaler
 
-np.random.seed(42)
-n_samples = 100
+np.random.seed(25)
+total_records = 80
 
-data = {
-    "Age": np.random.randint(22, 660, size = n_samples).astype(float),
-    "Salary": np.random.normal(65000, 15000, size = n_samples).round(-2),
-    "Department": np.random.choice(["HR", "Engineering", "Marketing", "Sales"], size = n_samples),
-    "Years_Of_Experience": np.random.randint(1, 35, size = n_samples).astype(float),
+employee_data = {
+    "Age": np.random.randint(21, 60, total_records).astype(float),
+    "Salary": np.random.normal(55000, 12000, total_records).round(-2),
+    "Department": np.random.choice(
+        ["Finance", "IT", "Operations", "Design"],
+        total_records
+    ),
+    "Years_Of_Experience": np.random.randint(0, 30, total_records).astype(float)
 }
 
-df = pd.DataFrame(data)
+employee_df = pd.DataFrame(employee_data)
 
-missing_rate = 0.15
+null_percentage = 0.10
 
-for col in df.columns:
-    mask = np.random.rand(len(df)) < missing_rate
-    df.loc[mask, col] = np.nan
+for field in employee_df.columns:
+    missing = np.random.random(len(employee_df)) < null_percentage
+    employee_df.loc[missing, field] = np.nan
 
-    print("--- Raw Dataset with Missing Values (First Five Rows) ---")
-    print(df.head())
+print("--- Original Data with Missing Entries ---")
+print(employee_df.head())
 
-    print("\nMissing values summary:")
-    print(df.isnull().sum())
+print("\nMissing Entry Count:")
+print(employee_df.isna().sum())
 
-    num_features = ["Age", "Salary", "Years_Of_Experience"]
-    cat_features = ["Department"]
+numerical_columns = ["Age", "Salary", "Years_Of_Experience"]
+categorical_columns = ["Department"]
 
-    num_pipeline = Pipeline(
-        [
-        ("imputer", SimpleImputer(strategy = "median")),
-        ("scaler", StandardScaler()),
-        ]
-    )
+numerical_steps = Pipeline(
+[
+    ("fill", SimpleImputer(strategy="mean")),
+    ("normalize", StandardScaler())
+]
+)
 
-    cat_pipeline = Pipeline (
-        [
-            ("imputer", SimpleImputer(strategy = "most_frequent")),
-            ("encoder", OneHotEncoder(sparse_output = False, drop = "first")),
-        ]
-    )
+categorical_steps = Pipeline(
+[
+    ("fill", SimpleImputer(strategy="most_frequent")),
+    ("convert", OneHotEncoder(sparse_output=False, drop="first"))
+]
+)
 
-    preprocessor = ColumnTransformer(
-        transformers = [
-            ("num", num_pipeline, num_features),
-            ("cat", cat_pipeline, cat_features)
-        ]
-    )
+data_transformer = ColumnTransformer(
+[
+    ("numbers", numerical_steps, numerical_columns),
+    ("categories", categorical_steps, categorical_columns)
+]
+)
 
-    processed_array = preprocessor.fit_transform(df)
+clean_data = data_transformer.fit_transform(employee_df)
 
-    encoded_cat_cols = (
-        preprocessor.named_transformers_["cat"]["encoder"].get_feature_names_out(cat_features).tolist()
-    )
-    feature_names = num_features + encoded_cat_cols
+category_names = (
+    data_transformer
+    .named_transformers_["categories"]["convert"]
+    .get_feature_names_out(categorical_columns)
+    .tolist()
+)
 
-    df_processed = pd.DataFrame(processed_array, columns = feature_names)
+all_columns = numerical_columns + category_names
 
-    print("\n--- Preprocessed Clean Dataset (First Five Rows) ---")
-    print(df_processed.head())
+clean_df = pd.DataFrame(clean_data, columns=all_columns)
+
+print("\n--- Processed Dataset ---")
+print(clean_df.head())
+
