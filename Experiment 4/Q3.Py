@@ -1,51 +1,61 @@
 import numpy as np
 import pandas as pd
-import matplotlib.pyplot as plt
 from sklearn.datasets import fetch_california_housing
 from sklearn.model_selection import train_test_split
 from sklearn.linear_model import LinearRegression
 from sklearn.preprocessing import PolynomialFeatures
 from sklearn.metrics import r2_score
 
-housing = fetch_california_housing()
+california = fetch_california_housing()
 
-df = pd.DataFrame(
-    housing.data,
-    columns=housing.feature_names
+data = pd.DataFrame
+(
+    california.data,
+    columns=california.feature_names
 )
 
-df["Price"] = housing.target
+data["House_Value"] = california.target
 
-X = df[["MedInc", "AveRooms"]]
-y = df["Price"]
+features = data[["MedInc", "AveRooms"]]
+target = data["House_Value"]
 
-X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+x_train, x_test, y_train, y_test = train_test_split
+(
+    features,
+    target,
+    test_size=0.25,
+    random_state=10
+)
 
-linear_model = LinearRegression()
-linear_model.fit(X_train, y_train)
+model_linear = LinearRegression()
+model_linear.fit(x_train, y_train)
 
-linear_pred = linear_model.predict(X_test)
-linear_r2 = r2_score(y_test, linear_pred)
+prediction_linear = model_linear.predict(x_test)
+score_linear = r2_score(y_test, prediction_linear)
 
-poly = PolynomialFeatures(degree=3)
+transformer = PolynomialFeatures
+(
+    degree=3,
+    include_bias=True
+)
 
-X_train_poly = poly.fit_transform(X_train)
-X_test_poly = poly.transform(X_test)
+train_poly = transformer.fit_transform(x_train)
+test_poly = transformer.transform(x_test)
 
-poly_model = LinearRegression()
-poly_model.fit(X_train_poly, y_train)
+model_poly = LinearRegression()
+model_poly.fit(train_poly, y_train)
 
-poly_pred = poly_model.predict(X_test_poly)
-poly_r2 = r2_score(y_test, poly_pred)
+prediction_poly = model_poly.predict(test_poly)
+score_poly = r2_score(y_test, prediction_poly)
 
-print("Linear Regression R2 Score:", linear_r2)
-print("Polynomial Regression R2 Score:", poly_r2)
+print("Linear Model R2:", score_linear)
+print("Polynomial Model R2:", score_poly)
 
-print("\nComparison")
-print("Linear Regression     :", linear_r2)
-print("Polynomial Regression :", poly_r2)
+print("\nModel Performance Comparison")
+print("Linear Model     :", score_linear)
+print("Polynomial Model :", score_poly)
 
-if poly_r2 > linear_r2:
-    print("\nPolynomial Regression has a higher R2 score.")
-else:
+if score_linear >= score_poly:
     print("\nLinear Regression has a higher R2 score.")
+else:
+    print("\nPolynomial Regression has a higher R2 score.")
