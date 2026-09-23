@@ -6,83 +6,95 @@ from sklearn.model_selection import train_test_split
 from sklearn.linear_model import LinearRegression
 from sklearn.metrics import mean_absolute_error, mean_squared_error, r2_score
 
-housing = fetch_california_housing()
+california = fetch_california_housing()
 
-df = pd.DataFrame(
-    housing.data,
-    columns=housing.feature_names
+records = pd.DataFrame
+(
+    california.data,
+    columns=california.feature_names
 )
 
-df["Price"] = housing.target
+records["HousePrice"] = california.target
 
-print("First 5 rows:")
-print(df.head())
+print("First Five Records:")
+print(records.head())
 
-print("\nDataset shape:")
-print(df.shape)
+print("\nDataset Shape:")
+print(records.shape)
 
-X = df[["AveRooms"]]
-y = df["Price"]
+rooms = records[["AveRooms"]]
+prices = records["HousePrice"]
 
-X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42
+x_train, x_test, y_train, y_test = train_test_split(
+    rooms,
+    prices,
+    test_size=0.25,
+    random_state=7
 )
 
 model = LinearRegression()
+model.fit(x_train, y_train)
 
-model.fit(X_train, y_train)
+predictions = model.predict(x_test)
 
-y_pred = model.predict(X_test)
-
-mae = mean_absolute_error(y_test, y_pred)
-mse = mean_squared_error(y_test, y_pred)
+mae = mean_absolute_error(y_test, predictions)
+mse = mean_squared_error(y_test, predictions)
 rmse = np.sqrt(mse)
-r2 = r2_score(y_test, y_pred)
+r2 = r2_score(y_test, predictions)
 
 print("\nModel Evaluation")
-print("------------------------")
-print("MAE  :", mae)
-print("MSE  :", mse)
-print("RMSE :", rmse)
-print("R2   :", r2)
+print("----------------")
+print("MAE:", mae)
+print("MSE:", mse)
+print("RMSE:", rmse)
+print("R2 Score:", r2)
 
-print("\nLinear Regression Equation:")
+print("\nRegression Equation:")
 print(
-    "Price =",
-    model.coef_[0],
-    "* AveRooms +",
-    model.intercept_
+    f"HousePrice = {model.intercept_:.4f} + "
+    f"{model.coef_[0]:.4f} × AveRooms"
 )
 
-rooms = float(input("\nEnter average number of rooms: "))
+rooms_input = float
+(
+    input("\nEnter average number of rooms: ")
+)
 
-new_prediction = model.predict(
-    pd.DataFrame({"AveRooms": [rooms]})
+prediction = model.predict
+(
+    pd.DataFrame({"AveRooms": [rooms_input]})
 )
 
 print(
-    f"Predicted house price: "
-    f"${new_prediction[0] * 100000:,.2f}"
+    f"Predicted House Price: "
+    f"${prediction[0] * 100000:,.2f}"
 )
 
-plt.scatter(
-    X_test,
+plt.figure(figsize=(10, 6))
+
+plt.scatter
+(
+    x_test["AveRooms"],
     y_test,
-    color="blue",
+    color="green",
     alpha=0.5,
-    label="Actual prices"
+    label="Actual Prices"
 )
 
-plt.plot(
-    X_test,
-    y_pred,
+sorted_test = x_test.sort_values("AveRooms")
+
+plt.plot
+(
+    sorted_test["AveRooms"],
+    model.predict(sorted_test),
     color="red",
     linewidth=2,
-    label="Regression line"
+    label="Regression Line"
 )
 
 plt.xlabel("Average Number of Rooms")
 plt.ylabel("House Price")
-plt.title("House Price Prediction Using One Feature")
-
+plt.title("House Price Prediction Using Linear Regression")
 plt.legend()
+plt.grid(True, alpha=0.3)
 plt.show()
