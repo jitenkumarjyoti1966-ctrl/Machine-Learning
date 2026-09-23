@@ -5,42 +5,72 @@ from sklearn.preprocessing import StandardScaler
 from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import roc_curve, roc_auc_score
 
-data = load_breast_cancer()
+cancer_data = load_breast_cancer()
 
-X = data.data
-y = data.target
+features = cancer_data.data
+labels = cancer_data.target
 
-X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42, stratify=y)
+train_features, test_features, train_labels, test_labels = train_test_split(
+    features,
+    labels,
+    test_size=0.25,
+    random_state=15,
+    stratify=labels
+)
 
-scaler = StandardScaler()
+normalizer = StandardScaler()
 
-X_train = scaler.fit_transform(X_train)
-X_test = scaler.transform(X_test)
+train_features = normalizer.fit_transform(train_features)
+test_features = normalizer.transform(test_features)
 
-model = LogisticRegression(max_iter=1000, random_state=42)
+classifier = LogisticRegression
+(
+    max_iter=1500,
+    random_state=15
+)
 
-model.fit(X_train, y_train)
+classifier.fit(train_features, train_labels)
 
-y_probability = model.predict_proba(X_test)[:, 1]
+probabilities = classifier.predict_proba(test_features)[:, 1]
 
-fpr, tpr, thresholds = roc_curve(y_test, y_probability)
+false_positive, true_positive, cutoff = roc_curve
+(
+    test_labels,
+    probabilities
+)
 
-auc_score = roc_auc_score(y_test, y_probability)
+roc_value = roc_auc_score
+(
+    test_labels,
+    probabilities
+)
 
-print("--- ROC and AUC ---")
-print(f"AUC Score: {auc_score:.4f}")
+print("--- ROC Curve Analysis ---")
+print(f"Area Under Curve: {roc_value:.4f}")
 
-plt.figure(figsize=(8, 6))
+plt.figure(figsize=(9, 6))
 
-plt.plot(fpr, tpr, color="blue", linewidth=2, label=f"Logistic Regression (AUC = {auc_score:.4f})")
+plt.plot
+(
+    false_positive,
+    true_positive,
+    color="green",
+    linewidth=2,
+    label=f"Logistic Model (AUC = {roc_value:.4f})"
+)
 
-plt.plot([0, 1], [0, 1], color="red", linestyle="--", label="Random Classifier")
+plt.plot(
+    [0, 1],
+    [0, 1],
+    color="black",
+    linestyle=":",
+    label="Random Prediction"
+)
 
 plt.xlabel("False Positive Rate")
 plt.ylabel("True Positive Rate")
-plt.title("ROC Curve - Logistic Regression")
-
+plt.title("ROC Curve for Breast Cancer Classification")
 plt.legend()
-plt.grid()
+plt.grid(alpha=0.3)
 
 plt.show()
