@@ -1,23 +1,26 @@
 import pandas as pd
 
-data = {
-    "Student Name": ["Rahul", "Pritam", "Samrat", "Anubhav", "Ankit"],
-    "Roll Number": [34, 33, 43, 11, 7],
-    "Marks": [72, 85, 91, 77, 68],
-    "Attendance": [88, 92, 76, 95, 81]
+students = pd.DataFrame(
+{
+    "Student Name": ["Dev", "Ishita", "Varun", "Megha", "Nikhil"],
+    "Roll Number": [26, 13, 31, 8, 45],
+    "Marks": [83, 69, 92, 76, 88],
+    "Attendance": [91, 84, 95, 79, 87]
 }
+)
 
-df = pd.DataFrame(data)
+def grade(score):
+    grades = {
+        90: "A",
+        80: "B",
+        70: "C",
+        0: "D"
+    }
 
-def assign_grade(marks):
-    if marks >= 90:
-        return 'A'
-    elif marks >= 80:
-        return 'B'
-    elif marks >= 70:
-        return 'C'
-    else:
-        return 'D'
+    for minimum, letter in sorted(grades.items(), reverse=True):
+        if score >= minimum:
+            return letter
 
-df["Grade"] = df["Marks"].apply(assign_grade)
-print(df)
+students["Grade"] = students["Marks"].map(grade)
+
+print(students)
