@@ -3,47 +3,57 @@ from sklearn.model_selection import train_test_split
 from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score
 
-data = {
-    "StudyHours": [1, 2, 2, 3, 3, 4, 4, 5, 5, 6, 6, 7, 7, 8, 9, 10],
-    "Attendance": [50, 55, 60, 62, 65, 68, 70, 72, 75, 78, 80, 82, 85, 88, 92, 95],
-    "Pass": [0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
+student_info = {
+    "Hours": [2, 3, 1, 4, 5, 6, 3, 7, 8, 5, 9, 6, 10, 7, 4, 8],
+    "Attendance_Percent": [52, 58, 55, 65, 70, 74, 63, 80, 85, 76, 94, 82, 96, 88, 68, 90],
+    "Result": [0, 0, 0, 0, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 0, 1]
 }
 
-df = pd.DataFrame(data)
+students = pd.DataFrame(student_info)
 
-print("Student Dataset:")
-print(df)
+print("Student Information:")
+print(students)
 
-X = df[["StudyHours", "Attendance"]]
-y = df["Pass"]
+inputs = students[["Hours", "Attendance_Percent"]]
+result = students["Result"]
 
-x_train, x_test, y_train, y_test = train_test_split(X, y, test_size=0.25, random_state=42, stratify=y)
-
-model = LogisticRegression(random_state=42)
-
-model.fit(x_train, y_train)
-
-y_pred = model.predict(x_test)
-
-print("\n--- Logistic Regression Performance ---")
-print(f"Accuracy  : {accuracy_score(y_test, y_pred):.4f}")
-print(f"Precision : {precision_score(y_test, y_pred):.4f}")
-print(f"Recall    : {recall_score(y_test, y_pred):.4f}")
-print(f"F1 Score  : {f1_score(y_test, y_pred):.4f}")
-
-study_hours = float(input("\nEnter study hours: "))
-attendance = float(input("Enter attendance percentage: "))
-
-new_student = pd.DataFrame(
-    {
-    "StudyHours": [study_hours],
-    "Attendance": [attendance]
-    }
+train_inputs, test_inputs, train_result, test_result = train_test_split
+(
+    inputs,
+    result,
+    test_size=0.25,
+    random_state=15,
+    stratify=result
 )
 
-prediction = model.predict(new_student)
+classifier = LogisticRegression()
+classifier.fit(train_inputs, train_result)
 
-if prediction[0] == 1:
-    print("\nPrediction: PASS")
-else:
-    print("\nPrediction: FAIL")
+test_prediction = classifier.predict(test_inputs)
+
+acc = accuracy_score(test_result, test_prediction)
+pre = precision_score(test_result, test_prediction)
+rec = recall_score(test_result, test_prediction)
+f1 = f1_score(test_result, test_prediction)
+
+print("\n--- Classification Results ---")
+print(f"Accuracy  : {acc:.4f}")
+print(f"Precision : {pre:.4f}")
+print(f"Recall    : {rec:.4f}")
+print(f"F1 Score  : {f1:.4f}")
+
+hours_input = float(input("\nEnter number of study hours: "))
+attendance_input = float(input("Enter attendance percentage: "))
+
+student = pd.DataFrame(
+{
+    "Hours": [hours_input],
+    "Attendance_Percent": [attendance_input]
+}
+)
+
+result_prediction = classifier.predict(student)
+
+status = "PASS" if result_prediction[0] == 1 else "FAIL"
+
+print("\nPrediction:", status)
