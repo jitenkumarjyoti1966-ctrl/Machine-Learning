@@ -17,7 +17,8 @@ fig, axes = plt.subplots(4, 4, figsize=(16, 12))
 axes = axes.flatten()
 
 for position, feature in enumerate(wine_df.columns):
-    sns.boxplot(
+    sns.boxplot
+(
         data=wine_df,
         y=feature,
         color="lightgreen",
