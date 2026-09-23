@@ -1,13 +1,15 @@
 import pandas as pd
 
-data = {
-    "Student Name": ["Amit", "Riya", "Sourav", "Neha", "Rahul"],
-    "Roll Number": [15, 17, 19, 20, 40],
-    "Marks": [72, 85, 68, 91, 77],
-    "Attendance": [88, 92, 76, 95, 81]
+student_data = {
+    "Student Name": ["Arjun", "Priya", "Kunal", "Sneha", "Vikram"],
+    "Roll Number": [12, 18, 23, 27, 34],
+    "Marks": [76, 89, 73, 94, 82],
+    "Attendance": [84, 91, 79, 96, 87]
 }
 
-df = pd.DataFrame(data)
-filtered_df = df[df["Marks"] > 80]
+student_df = pd.DataFrame(student_data)
+
+selected_students = student_df[student_df["Marks"] > 80]
+
 print("Students with Marks > 80:")
-print(filtered_df)
+print(selected_students)
